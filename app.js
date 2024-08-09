@@ -79,7 +79,7 @@ app.get('/recipes/:id', async (req, res) => {
 
 //  Iteration 6 - Update a Single Recipe
 //  PUT  /recipes/:id route
-app.put('recipes/:id', (req, res) => {
+app.put('/recipes/:id', (req, res) => {
     const { id } = req.params
     Recipe.findByIdAndUpdate(id, req.body, { new: true })
         .then(recipe => {
