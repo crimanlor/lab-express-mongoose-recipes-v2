@@ -1,6 +1,8 @@
+// Iteration 2 - Recipe Model
+
 const { Schema, model } = require('mongoose');
 
-// Creamos esquema
+// Creates Schema
 const recipeSchema = new Schema({
     title: {
         type: String,
@@ -34,8 +36,8 @@ const recipeSchema = new Schema({
     }
 })
 
-// Asociar esquema creado al modelo
+// Asociates Schema with model creating a new Recipe model
 const Recipe = new model('Recipe', recipeSchema)
 
-// Esportamos módulo Receta
+// Exports Recipe modul to use from app.js
 module.exports = Recipe

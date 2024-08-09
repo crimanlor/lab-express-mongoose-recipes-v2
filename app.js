@@ -1,5 +1,6 @@
 const express = require("express");
 const logger = require("morgan");
+const mongoose = require("mongoose");
 const Recipe = require('./models/Recipe.model.js');
 
 const app = express();
@@ -10,11 +11,7 @@ app.use(express.static("public"));
 app.use(express.json());
 
 
-// Iteration 1 - Connect to MongoDB
-// DATABASE CONNECTION
-const mongoose = require("mongoose");
-
-// Conexión a DB y crear express-mongoose-recipes-dev
+// Iteration 1 - Connect to MongoDB and create DB express-mongoose-recipes-dev
 const MONGODB_URI = 'mongodb+srv://criadomanzaneque:MSNvQed7qIZgA387@cluster0.fl8rdre.mongodb.net/express-mongoose-recipes-dev'; 
 
 mongoose.connect(MONGODB_URI)
@@ -32,11 +29,11 @@ app.get('/', (req, res) => {
 //  Iteration 3 - Create a Recipe route
 //  POST  /recipes route
 app.post('/recipes', (req, res) => {
-    // 1. Leer toda la información 
+    // Create a new recipe using the data from req.body
     const { title, instructions, level, ingredients, image, duration, isArchived, created } = req.body;
 
     Recipe.create({
-        title,
+         title,
         instructions,
         level,
         ingredients,
@@ -44,12 +41,12 @@ app.post('/recipes', (req, res) => {
         duration,
         isArchived,
         created
-    }).then((createdRecipe) => {
-        res.status(201).json(createdRecipe);
-    }).catch((err) => {
-        res.status(500).json({
-            message: "Error creating new recipe: " + err.message
-        })
+    })
+    .then((createdReciped) => {
+        res.status(201).json(createdReciped)
+    })
+    .catch((err) => {
+        res.status(500).json({ message: "Error creating new recipe: " + err.message})
     })
 })
 
@@ -59,23 +56,54 @@ app.get('/recipes', async (req, res) => {
     try {
         const recipes = await Recipe.find();
         res.json(recipes);
-
-    } catch (err) {
+    } catch(err){
         res.status(500).json(err.message)
-    }
+    }  
 })
 
 //  Iteration 5 - Get a Single Recipe
 //  GET  /recipes/:id route
-
+app.get('/recipes/:id', async (req, res) => {
+    const { id } = req.params 
+    Recipe.findById(id)
+        .then(recipe => {
+            if(!recipe) {
+                return res.status(404).json('Document not found for the given id')
+            }
+            res.json(recipe)
+        })
+        .catch((err) => {
+            res.status(500).json('Error while retrieving document : ' + err.message)
+        })
+})
 
 //  Iteration 6 - Update a Single Recipe
 //  PUT  /recipes/:id route
-
+app.put('recipes/:id', (req, res) => {
+    const { id } = req.params
+    Recipe.findByIdAndUpdate(id, req.body, { new: true })
+        .then(recipe => {
+            if(!recipe) {
+                return res.status(404).json('Document not found for the given id')
+            }
+            res.json(recipe);
+        })
+        .catch(err => {
+            res.status(500).json('Error while updating document : ' + err.message)
+        })
+})
 
 //  Iteration 7 - Delete a Single Recipe
 //  DELETE  /recipes/:id route
-
+app.delete('/recipes/:id', async (req, res) => {
+    const { id } = req.params
+    try {
+        await Recipe.findByIdAndDelete(id);
+        res.status(204).json('')
+    } catch (err) {
+        res.status(500).json('Error while deleting document: ' + err.message)
+    }
+})
 
 
 // Start the server
